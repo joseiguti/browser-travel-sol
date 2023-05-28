@@ -1,0 +1,182 @@
+<?php $this->headTitle('Map'); ?>
+<div id="map" style="width: 100%; height: 400px;"></div>
+
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="exampleModalCenterTitle" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Dato histórico</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="message_content"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="historicalModal" tabindex="-1" role="dialog" aria-labelledby="historicalModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historicalModalLabel">Histórico de Humedad</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody id="recordTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function initMap() {
+
+        // Crea el mapa en el contenedor "map" utilizando la clave de API
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 39.0997, lng: -94.5786},
+            zoom: 4,
+            zoomControl: true,
+            mapTypeControl: false,
+            scaleControl: false,
+            streetViewControl: false,
+            rotateControl: false,
+            fullscreenControl: false
+        });
+
+        const hisButton = document.createElement('button');
+        hisButton.innerHTML = 'Historico';
+        hisButton.classList.add('btn', 'btn-dark');
+
+        hisButton.style.top = '10px';
+        hisButton.style.left = '10px';
+        hisButton.style.padding = '5px';
+        hisButton.style.margin = '5px';
+
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(hisButton);
+
+        function showHistoricalModal() {
+            $('#historicalModal').modal('show');
+        }
+
+        hisButton.addEventListener('click', showHistoricalModal);
+
+        const currButton = document.createElement('button');
+        currButton.innerHTML = 'Humedad actual';
+        currButton.classList.add('btn', 'btn-dark');
+
+        currButton.style.top = '10px';
+        currButton.style.left = '10px';
+        currButton.style.padding = '5px';
+        currButton.style.margin = '5px';
+
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(currButton);
+
+        function showCurrentData() {
+            window.location.href = '/';
+        }
+
+        currButton.addEventListener('click', showCurrentData);
+
+        // Verificar si la variable GET "weatherId" está presente
+        const urlParams = new URLSearchParams(window.location.search);
+        const weatherId = urlParams.get('weatherId');
+
+        // Mensaje para mostrar en el mapa
+        let message = '';
+
+        if (weatherId) {
+            // Información del histórico
+            const historicalDateTime = getHistoricalDateTime(); // Función para obtener la fecha y hora del histórico
+            message = `Se muestra en el mapa para (Fecha: ${historicalDateTime.date}, Hora: ${historicalDateTime.time})`;
+            $('#message_content').html(message)
+            $('#messageModal').modal('show');
+        }
+
+        // Realiza una solicitud GET a la API para obtener los datos de humedad
+        fetch('api/humidity')
+            .then(response => response.json())
+            .then(data => {
+                const cities = data.data;
+
+                // Itera sobre las ciudades y agrega marcadores en el mapa
+                Object.keys(cities).forEach(cityName => {
+                    const city = cities[cityName];
+
+                    // Crea un nuevo marcador en el mapa
+                    const marker = new google.maps.Marker({
+                        position: { lat: city.lat, lng: city.lon },
+                        map: map,
+                        title: cityName
+                    });
+
+                    // Crea una ventana de información para mostrar la humedad
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `Humedad: ${city.humidity}%`
+                    });
+
+                    // Agrega un listener para abrir la ventana de información al hacer clic en el marcador
+                    marker.addListener('click', () => {
+                        infoWindow.open(map, marker);
+                    });
+                });
+
+                const historicalRecords = data.historical;
+
+                // Mostrar registros históricos en la tabla
+                const recordTableBody = document.getElementById('recordTableBody');
+                historicalRecords.forEach(record => {
+                    const row = document.createElement('tr');
+                    const dateCell = document.createElement('td');
+                    const timeCell = document.createElement('td');
+                    const actionCell = document.createElement('td');
+                    const link = document.createElement('a');
+
+                    dateCell.textContent = record.ack.split(' ')[0];
+                    timeCell.textContent = record.ack.split(' ')[1];
+                    link.href = `/?weatherId=${record.id}`;
+                    link.textContent = 'Ver';
+
+                    actionCell.appendChild(link);
+                    row.appendChild(dateCell);
+                    row.appendChild(timeCell);
+                    row.appendChild(actionCell);
+
+                    recordTableBody.appendChild(row);
+                });
+            });
+
+
+    }
+
+    function getHistoricalDateTime() {
+        // Obtener la fecha y hora actual (simulación)
+        const currentDate = new Date();
+        const date = currentDate.toLocaleDateString();
+        const time = currentDate.toLocaleTimeString();
+        return { date, time };
+    }
+</script>
+<script src="<?= $this->escapeHtml( str_replace('{api_key}',$this->googleMapsService['api-key'], $this->googleMapsService['end-point']) ) ?>" async defer></script>
