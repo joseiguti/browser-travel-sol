@@ -77,39 +77,39 @@ composer serve
 
 ```json
 {
-  ack: "2023-05-28 21:31:46", 
-  data: { 
-    Miami: {
-      lat: 25.7617,
-      lon: -80.1918,
-      humidity: 66
+  "ack": "2023-05-28 21:31:46", 
+  "data": { 
+    "Miami": {
+      "lat": 25.7617,
+      "lon": -80.1918,
+      "humidity": 66
     },
-    Orlando: {
-      lat: 28.5383,
-      lon: -81.3792,
-      humidity: 47
+    "Orlando": {
+      "lat": 28.5383,
+      "lon": -81.3792,
+      "humidity": 47
     },
-    Nueva York: {
-      lat: 40.7128,
-      lon: -74.006,
-      humidity: 42
+    "Nueva York": {
+      "lat": 40.7128,
+      "lon": -74.006,
+      "humidity": 42
     }
   },
-  historical: [ 
+  "historical": [ 
     {
-      id: 3,
-      ack: "2023-05-28 21:31:46"
+      "id": 3,
+      "ack": "2023-05-28 21:31:46"
     },
     {
-      id: 2,
-      ack: "2023-05-28 21:22:24"
+      "id": 2,
+      "ack": "2023-05-28 21:22:24"
     },
     {
-      id: 1,
-      ack: "2023-05-28 21:22:15"
+      "id": 1,
+      "ack": "2023-05-28 21:22:15"
     }
   ],
-  error: "" 
+  "error": "" 
 }
 ```
 
