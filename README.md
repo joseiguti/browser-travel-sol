@@ -77,8 +77,8 @@ composer serve
 
 ```json
 {
-  ack: "2023-05-28 21:31:46", // Fecha y hora del historico o solicitud
-  data: { // Contiene los datos de las ciudades solicitadas con su % de humedad
+  ack: "2023-05-28 21:31:46", 
+  data: { 
     Miami: {
       lat: 25.7617,
       lon: -80.1918,
@@ -95,7 +95,7 @@ composer serve
       humidity: 42
     }
   },
-  historical: [ // Informacion historica que se usa para mostrarse. Solo se obtienen los 10 últimos valores almacenados.
+  historical: [ 
     {
       id: 3,
       ack: "2023-05-28 21:31:46"
@@ -109,7 +109,7 @@ composer serve
       ack: "2023-05-28 21:22:15"
     }
   ],
-  error: "" // Obtiene el último error encontrado
+  error: "" 
 }
 ```
 
